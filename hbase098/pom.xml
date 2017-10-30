@@ -21,7 +21,7 @@ LICENSE file.
   <parent>
     <groupId>com.yahoo.ycsb</groupId>
     <artifactId>binding-parent</artifactId>
-    <version>0.13.0-SNAPSHOT</version>
+    <version>0.14.0-SNAPSHOT</version>
     <relativePath>../binding-parent/</relativePath>
   </parent>
 
@@ -33,6 +33,12 @@ LICENSE file.
       <groupId>org.apache.hbase</groupId>
       <artifactId>hbase-client</artifactId>
       <version>${hbase098.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>jdk.tools</groupId>
+          <artifactId>jdk.tools</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.yahoo.ycsb</groupId>

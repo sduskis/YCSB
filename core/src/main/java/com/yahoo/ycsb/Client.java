@@ -331,25 +331,25 @@ final class RemainingFormatter {
     StringBuilder time = new StringBuilder();
     long days = TimeUnit.SECONDS.toDays(seconds);
     if (days > 0) {
-      time.append(days).append(" days ");
+      time.append(days).append(days == 1 ? " day " : " days ");
       seconds -= TimeUnit.DAYS.toSeconds(days);
     }
     long hours = TimeUnit.SECONDS.toHours(seconds);
     if (hours > 0) {
-      time.append(hours).append(" hours ");
+      time.append(hours).append(hours == 1 ? " hour " : " hours ");
       seconds -= TimeUnit.HOURS.toSeconds(hours);
     }
     /* Only include minute granularity if we're < 1 day. */
     if (days < 1) {
       long minutes = TimeUnit.SECONDS.toMinutes(seconds);
       if (minutes > 0) {
-        time.append(minutes).append(" minutes ");
+        time.append(minutes).append(minutes == 1 ? " minute " : " minutes ");
         seconds -= TimeUnit.MINUTES.toSeconds(seconds);
       }
     }
     /* Only bother to include seconds if we're < 1 minute */
     if (time.length() == 0) {
-      time.append(seconds).append(" seconds ");
+      time.append(seconds).append(time.length() == 1 ? " second " : " seconds ");
     }
     return time;
   }
@@ -405,6 +405,14 @@ class ClientThread implements Runnable {
     this.completeLatch = completeLatch;
   }
 
+  public void setThreadId(final int threadId) {
+    threadid = threadId;
+  }
+  
+  public void setThreadCount(final int threadCount) {
+    threadcount = threadCount;
+  }
+  
   public int getOpsDone() {
     return opsdone;
   }
@@ -877,7 +885,8 @@ public final class Client {
 
         ClientThread t = new ClientThread(db, dotransactions, workload, props, threadopcount, targetperthreadperms,
             completeLatch);
-
+        t.setThreadId(threadid);
+        t.setThreadCount(threadcount);
         clients.add(t);
       }
 

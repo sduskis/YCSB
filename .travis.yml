@@ -20,9 +20,14 @@
 language: java
 
 jdk:
+  - oraclejdk9
   - oraclejdk8
-  - oraclejdk7
   - openjdk7
+
+addons:
+  hosts:
+    - myshorthost
+  hostname: myshorthost
 
 install: mvn install -q -DskipTests=true
 
@@ -31,8 +36,9 @@ script: mvn test -q
 # Services to start for tests.
 services:
   - mongodb
-  - riak
+# temporarily disable riak. failing, docs offline.
+#  - riak
 
 
-# Use the Container based infrastructure.
-sudo: false
+# Can't use container based infra because of hosts/hostname
+sudo: true

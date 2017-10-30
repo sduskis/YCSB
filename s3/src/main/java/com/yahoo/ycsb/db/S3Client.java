@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.net.*;
 
+import com.amazonaws.util.IOUtils;
 import com.yahoo.ycsb.ByteArrayByteIterator;
 import com.yahoo.ycsb.ByteIterator;
 import com.yahoo.ycsb.DB;
@@ -258,7 +259,7 @@ public class S3Client extends DB {
   */
   @Override
   public Status insert(String bucket, String key,
-      HashMap<String, ByteIterator> values) {
+                       Map<String, ByteIterator> values) {
     return writeToStorage(bucket, key, values, true, sse, ssecKey);
   }
   /**
@@ -278,7 +279,7 @@ public class S3Client extends DB {
   */
   @Override
   public Status read(String bucket, String key, Set<String> fields,
-        HashMap<String, ByteIterator> result) {
+                     Map<String, ByteIterator> result) {
     return readFromStorage(bucket, key, result, ssecKey);
   }
   /**
@@ -296,7 +297,7 @@ public class S3Client extends DB {
   */
   @Override
   public Status update(String bucket, String key,
-        HashMap<String, ByteIterator> values) {
+                       Map<String, ByteIterator> values) {
     return writeToStorage(bucket, key, values, false, sse, ssecKey);
   }
   /**
@@ -336,8 +337,8 @@ public class S3Client extends DB {
   *
   */
   protected Status writeToStorage(String bucket, String key,
-        HashMap<String, ByteIterator> values, Boolean updateMarker,
-            String sseLocal, SSECustomerKey ssecLocal) {
+                                  Map<String, ByteIterator> values, Boolean updateMarker,
+                                  String sseLocal, SSECustomerKey ssecLocal) {
     int totalSize = 0;
     int fieldCount = values.size(); //number of fields to concatenate
     // getting the first field in the values
@@ -422,15 +423,12 @@ public class S3Client extends DB {
   *
   */
   protected Status readFromStorage(String bucket, String key,
-        HashMap<String, ByteIterator> result, SSECustomerKey ssecLocal) {
+                                   Map<String, ByteIterator> result, SSECustomerKey ssecLocal) {
     try {
       Map.Entry<S3Object, ObjectMetadata> objectAndMetadata = getS3ObjectAndMetadata(bucket, key, ssecLocal);
       InputStream objectData = objectAndMetadata.getKey().getObjectContent(); //consuming the stream
       // writing the stream to bytes and to results
-      int sizeOfFile = (int)objectAndMetadata.getValue().getContentLength();
-      byte[] inputStreamToByte = new byte[sizeOfFile];
-      objectData.read(inputStreamToByte, 0, sizeOfFile);
-      result.put(key, new ByteArrayByteIterator(inputStreamToByte));
+      result.put(key, new ByteArrayByteIterator(IOUtils.toByteArray(objectData)));
       objectData.close();
       objectAndMetadata.getKey().close();
     } catch (Exception e){
